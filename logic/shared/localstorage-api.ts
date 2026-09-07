@@ -1,4 +1,4 @@
-interface StoredItem {
+export interface StoredItem {
     id: string;
     lastModified: number
 }
@@ -19,7 +19,7 @@ export default class LocalStorage<T extends StoredItem> {
      * Gets the ids of all values stored in the localstorage
      * @returns a list of the ids
      */
-    getAll(): string[] {
+    getIds(): string[] {
         const data = localStorage.getItem(this.getResourceKeysLocation())
 
         if (!data) return [];
@@ -44,6 +44,20 @@ export default class LocalStorage<T extends StoredItem> {
         return this.validate(json)
     }
 
+    create(): T {
+        const newId = crypto.randomUUID();
+
+        this.addKey(newId);
+
+        //Typescript complains if the return type isnt explicitly cast
+        //It should return the correct type though.
+        return {
+            id: newId,
+            lastModified: Date.now(),
+            ...this.defaultValue,
+        } as T;
+    }
+
     /**
      * Saves a JSON object to localstorage and updates the last modified time to the current time
      * @param data the object to store
@@ -62,6 +76,12 @@ export default class LocalStorage<T extends StoredItem> {
             this.getResourceLocation(data.id),
             JSON.stringify(data)
         );
+    }
+
+    delete(id: string){
+        localStorage.removeItem(
+            this.getResourceLocation(id)
+        )
     }
 
     /**
@@ -96,7 +116,7 @@ export default class LocalStorage<T extends StoredItem> {
     }
 
     private addKey(key: string){
-        const keys = this.getAll();
+        const keys = this.getIds();
 
         keys.push(key);
 
@@ -104,5 +124,16 @@ export default class LocalStorage<T extends StoredItem> {
             this.getResourceKeysLocation(),
             JSON.stringify(keys)
           );
+    }
+
+    private removeKey(key: string){
+        const keys = this.getIds();
+
+        const updatedKeys = keys.filter(id => id !== key);
+
+        localStorage.setItem(
+            this.getResourceKeysLocation(),
+            JSON.stringify(keys)
+        )
     }
 }
