@@ -1,140 +1,34 @@
 'use client';
 
-import { zlibCompress, zlibDecompress } from "../shared/compress";
+import { generateShareParams, importData } from "../shared/compress";
 import { BingoCardData } from "@/data/bingo";
 import SeededRng from "../shared/seeded-rng";
-
-const BINGO_CARD_STORAGE = "/bingo/cards/";
-const BINGO_CARD_FORMAT = "/bingo/card-data-format";
-const CURRENT_FORMAT = "0";
-
-const getCardStoragePath = (id: string) => BINGO_CARD_STORAGE+id;
-
-const DEFAULT_NAME = "Custom Bingo Card";
-const DEFAULT_ROWS = 5;
-const DEFAULT_COLS = 5;
-const DEFAULT_HAS_FREE_SPACE = true;
-const DEFAULT_FREE_SPACE_TEXT = "Free";
-const DEFAULT_THEME = "default";
+import LocalStorage from "../shared/localstorage-api";
 
 //Card limits
 //Rows & Cols 3-7
 //Bingo cells 30-50 chars
 //100 values max
-const updateCardsList = (ids: string[]) => {
-    localStorage.setItem(BINGO_CARD_STORAGE, JSON.stringify(ids))
-}
-
-const migrateFormat = () => {
-    const clientFormat = localStorage.getItem(BINGO_CARD_FORMAT)
-    if (clientFormat === null){
-        localStorage.setItem(BINGO_CARD_FORMAT,CURRENT_FORMAT);
-        return;
-    }
-    if (clientFormat === CURRENT_FORMAT){
-        
-    }
-}
 
 export class BingoCardManage {
+
+    static readonly localStorage = new LocalStorage<BingoCardData>(
+        "/bingo/cards",
+        {
+            name: "Custom Bingo Card",
+            rows: 5,
+            cols: 5,
+            hasFreeSpace: true,
+            freeSpaceText: "Free",
+            values: [],
+            theme: "",
+        }
+    )
 
     private constructor(
         private cardData: BingoCardData, 
         private temporary: boolean = false //tracks if the card was loaded in as temporary data from an import
-    ) {
-        //Save changes
-        if (!cardData.id){
-            throw new Error("Card is missing a valid ID!")
-        }
-
-        if (!cardData.lastEdited){
-            cardData.lastEdited = Date.now();
-        }
-
-        if (!cardData.name){
-            cardData.name = DEFAULT_NAME;
-            cardData.lastEdited = Date.now();
-        }
-
-        if (!cardData.rows){
-            cardData.rows = DEFAULT_ROWS;
-            cardData.lastEdited = Date.now();
-        }
-
-        if (!cardData.cols){
-            cardData.cols = DEFAULT_COLS;
-            cardData.lastEdited = Date.now();
-        }
-
-        if (cardData.hasFreeSpace === undefined){
-            cardData.hasFreeSpace = DEFAULT_HAS_FREE_SPACE;
-            cardData.lastEdited = Date.now();
-        }
-
-        if (!cardData.freeSpaceText){
-            cardData.freeSpaceText = DEFAULT_FREE_SPACE_TEXT;
-            cardData.lastEdited = Date.now();
-        }
-
-        if (!cardData.theme){
-            cardData.theme = DEFAULT_THEME;
-            cardData.lastEdited = Date.now();
-        }
-
-        if (!cardData.values){
-            cardData.values = [];
-            cardData.lastEdited = Date.now();
-        }
-
-        if (!this.temporary){
-            this.save();
-        }
-    }
-
-    static listBingoCardIds(): string[] {
-        const json = localStorage.getItem(BINGO_CARD_STORAGE)
-        if (!json){
-            return [];
-        }
-        return JSON.parse(json);
-    }
-
-    static createBingoCard(){
-        const newId = crypto.randomUUID();
-
-        const cards = this.listBingoCardIds();
-        cards.push(newId);
-        updateCardsList(cards);
-
-        return new BingoCardManage({
-            id: newId,
-            name: DEFAULT_NAME,
-            rows: DEFAULT_COLS,
-            cols: DEFAULT_ROWS,
-            hasFreeSpace: DEFAULT_HAS_FREE_SPACE,
-            freeSpaceText: DEFAULT_FREE_SPACE_TEXT,
-            theme: DEFAULT_THEME,
-            values: [],
-            lastEdited: Date.now()
-        })
-    }
-
-    static loadBingoCard(id: string): BingoCardManage | null {
-        const json = localStorage.getItem(getCardStoragePath(id));
-        if (!json){
-            return null;
-        }
-
-        const cardData = JSON.parse(json) as BingoCardData;
-        return new BingoCardManage(cardData)
-    }
-
-    static importBingoCard(compressedData: string): BingoCardManage {
-        const json = zlibDecompress(compressedData);
-        const cardData = JSON.parse(json) as BingoCardData;
-
-        return new BingoCardManage(cardData, true);
-    }
+    ) { }
 
     getData(): BingoCardData {
         return {
@@ -161,6 +55,46 @@ export class BingoCardManage {
             result += chars[hashArray[i] % 62];
         }
         return result;
+    }
+
+    updateData(data: Partial<Omit<BingoCardData, "id" | "lastModified">>) {
+        this.cardData = {
+            ...this.cardData,
+            ...data
+        }
+
+        this.cardData.lastModified = Date.now();
+
+        BingoCardManage.localStorage.update(this.cardData)
+    }
+
+    export(): string {
+        return BingoCardManage.localStorage.share(this.cardData);
+    }
+
+    save(){
+        if (this.temporary){
+            //Add card to list
+            const newTemplate = BingoCardManage.localStorage.create();
+            this.cardData.id = newTemplate.id;
+ 
+            this.temporary = false
+        }
+
+        BingoCardManage.localStorage.save(this.cardData);
+    }
+
+    delete(){
+        BingoCardManage.localStorage.delete(this.cardData.id);        
+    }
+
+    static importBingoCard(shareParams: URLSearchParams): BingoCardManage {
+        const cardData = importData<BingoCardData>(shareParams);
+        if (!cardData){
+            throw new Error("Failed to import bingo card");
+        }
+
+        return new BingoCardManage(cardData, true);
     }
 
     static generateCardValues(cardData: BingoCardData, seed: number): string[] {
@@ -194,50 +128,21 @@ export class BingoCardManage {
             vals.push(...pool.splice(nextIdx,1))
         }
         return vals;
-    } 
-
-    updateData(data: Partial<Omit<BingoCardData, "id" | "lastEdited">>) {
-        this.cardData = {
-            ...this.cardData,
-            ...data
-        }
-
-        this.cardData.lastEdited = Date.now();
-
-        this.save()
     }
 
-    export(): string {
-        const json = JSON.stringify(this.cardData);
-        const compressed = zlibCompress(json);
-        return compressed;
+    static listBingoCardIds(): string[] {
+        return this.localStorage.getIds();
     }
 
-    save(){
-        if (this.temporary){
-            //Add card to list
-            const cards = BingoCardManage.listBingoCardIds()
-
-            cards.push(this.cardData.id)
-
-            updateCardsList(cards)
-
-            this.temporary = false
-        }
-        
-        localStorage.setItem(
-            getCardStoragePath(this.cardData.id),
-            JSON.stringify(this.cardData)
-        )
+    static createBingoCard(){
+        return this.localStorage.create()
     }
 
-    delete(){
-        localStorage.removeItem(getCardStoragePath(this.cardData.id))
-        
-        const ids = BingoCardManage.listBingoCardIds()
+    static loadBingoCard(id: string): BingoCardManage | null {
+        const cardData = this.localStorage.load(id);
 
-        const newIds = ids.filter(id => id !== this.cardData.id)
+        if (!cardData) return null;
 
-        updateCardsList(newIds);        
+        return new BingoCardManage(cardData);
     }
 }
