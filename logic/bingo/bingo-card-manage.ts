@@ -10,20 +10,22 @@ import LocalStorage from "../shared/localstorage-api";
 //Bingo cells 30-50 chars
 //100 values max
 
-export class BingoCardManage {
+export const DEFAULT_CARD_VALUES = {
+    name: "Custom Bingo Card",
+    rows: 5,
+    cols: 5,
+    hasFreeSpace: true,
+    freeSpaceText: "Free",
+    values: [],
+    theme: "",
+}
 
-    static readonly localStorage = new LocalStorage<BingoCardData>(
+const bingoCardStorage = new LocalStorage<BingoCardData>(
         "/bingo/cards",
-        {
-            name: "Custom Bingo Card",
-            rows: 5,
-            cols: 5,
-            hasFreeSpace: true,
-            freeSpaceText: "Free",
-            values: [],
-            theme: "",
-        }
+        DEFAULT_CARD_VALUES
     )
+
+export class BingoCardManage {
 
     private constructor(
         private cardData: BingoCardData, 
@@ -65,30 +67,30 @@ export class BingoCardManage {
 
         this.cardData.lastModified = Date.now();
 
-        BingoCardManage.localStorage.update(this.cardData)
-    }
-
-    export(): string {
-        return BingoCardManage.localStorage.share(this.cardData);
+        bingoCardStorage.update(this.cardData)
     }
 
     save(){
         if (this.temporary){
             //Add card to list
-            const newTemplate = BingoCardManage.localStorage.create();
+            const newTemplate = bingoCardStorage.create();
             this.cardData.id = newTemplate.id;
  
             this.temporary = false
         }
 
-        BingoCardManage.localStorage.save(this.cardData);
+        bingoCardStorage.save(this.cardData);
     }
 
     delete(){
-        BingoCardManage.localStorage.delete(this.cardData.id);        
+        bingoCardStorage.delete(this.cardData.id);        
     }
 
-    static importBingoCard(shareParams: URLSearchParams): BingoCardManage {
+    export(): string {
+        return bingoCardStorage.share(this.cardData);
+    }
+
+    static import(shareParams: URLSearchParams): BingoCardManage {
         const cardData = importData<BingoCardData>(shareParams);
         if (!cardData){
             throw new Error("Failed to import bingo card");
@@ -131,15 +133,15 @@ export class BingoCardManage {
     }
 
     static listBingoCardIds(): string[] {
-        return this.localStorage.getIds();
+        return bingoCardStorage.getIds();
     }
 
     static createBingoCard(){
-        return this.localStorage.create()
+        return bingoCardStorage.create()
     }
 
     static loadBingoCard(id: string): BingoCardManage | null {
-        const cardData = this.localStorage.load(id);
+        const cardData = bingoCardStorage.load(id);
 
         if (!cardData) return null;
 
