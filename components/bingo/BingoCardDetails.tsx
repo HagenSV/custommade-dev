@@ -25,7 +25,7 @@ export default function BingoCardDetails({ card, deleteFunc }: Props) {
     return (
         <div className="bg-white rounded-xl shadow-md p-6 dark:bg-mist-800">
             <p className="text-xl font-bold">{ card.getData().name }</p>
-            <p className="text-sm text-neutral-900 dark:text-neutral-400">Edited { new Date(card.getData().lastEdited).toDateString() }</p>
+            <p className="text-sm text-neutral-900 dark:text-neutral-400">Edited { new Date(card.getData().lastModified).toDateString() }</p>
             <div className="flex flex-row justify-center gap-4">
                     
                 <Link href={BingoRoutes.edit(card)} className="p-3 hover:text-blue-500"><Edit2 /></Link>

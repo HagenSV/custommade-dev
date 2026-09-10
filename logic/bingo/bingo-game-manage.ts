@@ -1,29 +1,18 @@
 'use client';
 
-import { zlibCompress, zlibDecompress } from "../shared/compress";
 import { BingoGameData } from "@/data/bingo";
-import { BingoCardManage } from "./bingo-card-manage";
+import { BingoCardManage, DEFAULT_CARD_VALUES } from "./bingo-card-manage";
+import LocalStorage from "../shared/localstorage-api";
 
-const BINGO_GAME_STORAGE = "/bingo/games/";
-const BINGO_GAME_FORMAT = "/bingo/game-data-format";
-const CURRENT_FORMAT = "0";
-
-const getGameStoragePath = (id: string) => BINGO_GAME_STORAGE+id;
-
-const updateCardsList = (ids: string[]) => {
-    localStorage.setItem(BINGO_GAME_STORAGE, JSON.stringify(ids))
-}
-
-const migrateFormat = () => {
-    const clientFormat = localStorage.getItem(BINGO_GAME_FORMAT)
-    if (clientFormat === null){
-        localStorage.setItem(BINGO_GAME_FORMAT,CURRENT_FORMAT);
-        return;
+const bingoGameStorage = new LocalStorage<BingoGameData>(
+    "/bingo/games",
+    {
+        highlightedSpaces: 0,
+        card: DEFAULT_CARD_VALUES,
+        name: DEFAULT_CARD_VALUES.name + " Game",
+        seed: 0
     }
-    if (clientFormat === CURRENT_FORMAT){
-        
-    }
-}
+)
 
 export class BingoGameManage {
 
@@ -42,44 +31,24 @@ export class BingoGameManage {
     }
 
     static listBingoGameIds(): string[] {
-        const json = localStorage.getItem(BINGO_GAME_STORAGE)
-        if (!json){
-            return [];
-        }
-        return JSON.parse(json);
+        return bingoGameStorage.getIds();
     }
 
     static createBingoGame(card: BingoCardManage, seed: number){
-        const newId = crypto.randomUUID();
+        const newGame = bingoGameStorage.create();
 
-        const cards = this.listBingoGameIds();
-        cards.push(newId);
-        updateCardsList(cards);
+        newGame.card = card.getData();
+        newGame.name = card.getData().name + " Game";
+        newGame.seed = seed;
 
-        return new BingoGameManage({
-            id: newId,
-            name: card.getData().name,
-            card: card.getData(),
-            highlightedSpaces: 0,
-            seed,
-            lastPlayed: Date.now()
-        })
+        bingoGameStorage.update(newGame);
+
+        return new BingoGameManage(newGame);
     }
 
     static loadBingoGame(id: string): BingoGameManage | null {
-        const json = localStorage.getItem(getGameStoragePath(id));
-        if (!json){
-            return null;
-        }
-
-        const gameData = JSON.parse(json) as BingoGameData;
-        return new BingoGameManage(gameData)
-    }
-
-    static importBingoGame(compressedData: string): BingoGameManage {
-        const json = zlibDecompress(compressedData);
-        const gameData = JSON.parse(json) as BingoGameData;
-
+        const gameData = bingoGameStorage.load(id);
+        if (!gameData){ return null; }
         return new BingoGameManage(gameData);
     }
 
@@ -98,7 +67,7 @@ export class BingoGameManage {
     clearHighlights(){
         this.gameData.highlightedSpaces = 0
 
-        this.save();
+        this.update();
     }
 
     toggleCell(row: number, col: number){
@@ -107,31 +76,27 @@ export class BingoGameManage {
         const cell = (2**cellId) * (this.isHighlighed(row, col) ? -1 : 1)
         this.gameData.highlightedSpaces += cell
 
-        this.save();
+        this.update();
     }
 
-    export(): string {
-        const json = JSON.stringify(this.gameData);
-        const compressed = zlibCompress(json);
-        return compressed;
+    update(){
+        bingoGameStorage.update(this.gameData);
     }
 
     save(){
-        this.gameData.lastPlayed = Date.now();
-        
-        localStorage.setItem(
-            getGameStoragePath(this.gameData.id),
-            JSON.stringify(this.gameData)
-        )
+        bingoGameStorage.save(this.gameData);
     }
 
     delete(){
-        localStorage.removeItem(getGameStoragePath(this.gameData.id))
-        
-        const ids = BingoGameManage.listBingoGameIds()
+        bingoGameStorage.delete(this.gameData.id);
+    }
 
-        const newIds = ids.filter(id => id !== this.gameData.id)
+    export(): string {
+        return bingoGameStorage.share(this.gameData);
+    }
 
-        updateCardsList(newIds);        
+    static import(params: URLSearchParams) {
+        const gameData = bingoGameStorage.import(params);
+        return new BingoGameManage(gameData);
     }
 }

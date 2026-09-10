@@ -1,5 +1,6 @@
-export interface BingoCardData {
-    id: string;
+import { StoredItem } from "@/logic/shared/localstorage-api";
+
+export interface BingoCardData extends StoredItem {
     name: string;
     rows: number;
     cols: number;
@@ -7,14 +8,11 @@ export interface BingoCardData {
     freeSpaceText: string;
     values: string[];
     theme: string;
-    lastEdited: number;
 }
 
-export interface BingoGameData {
-    id: string;
+export interface BingoGameData extends StoredItem {
     name: string;
-    card: BingoCardData;
+    card: Omit<BingoCardData, keyof StoredItem>;
     highlightedSpaces: number;
     seed: number;
-    lastPlayed: number;
 }
