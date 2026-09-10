@@ -137,7 +137,7 @@ export class BingoCardManage {
     }
 
     static createBingoCard(){
-        return bingoCardStorage.create()
+        return new BingoCardManage(bingoCardStorage.create());
     }
 
     static loadBingoCard(id: string): BingoCardManage | null {

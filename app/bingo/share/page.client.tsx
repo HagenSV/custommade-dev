@@ -17,13 +17,7 @@ export default function ShareBingoCardClientPage(){
         const loadClass = async () => {
             const { BingoCardManage } = await import("@/logic/bingo/bingo-card-manage")
 
-            const shareData = searchParams.get("data")
-
-            if (!shareData){
-                return;
-            }
-
-            const card = BingoCardManage.importBingoCard(shareData);
+            const card = BingoCardManage.import(searchParams);
 
             if (!card){
                 //Todo: Error message
