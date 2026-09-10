@@ -12,7 +12,7 @@ export interface BingoCardData extends StoredItem {
 
 export interface BingoGameData extends StoredItem {
     name: string;
-    card: BingoCardData;
+    card: Omit<BingoCardData, keyof StoredItem>;
     highlightedSpaces: number;
     seed: number;
 }
