@@ -26,11 +26,14 @@ export const BingoCardActions: IBingoCardActions = {
         async function copyToClipboard() {
         
             try {
-                const data = card.export();
-                const urlEncoded = encodeURIComponent(data)
-                await navigator.clipboard.writeText(urlEncoded);
-            } catch (e) { }
+                const result = card.export();
+                await navigator.clipboard.writeText(result);
+                //TODO: notify client
+            } catch (e) {
+                //TODO: notify client
+            }
         }
+
 
         copyToClipboard()
     }
