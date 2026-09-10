@@ -1,3 +1,5 @@
+import { generateShareParams, importData } from "./compress";
+
 export interface StoredItem {
     id: string;
     lastModified: number
@@ -6,7 +8,7 @@ export interface StoredItem {
 type StoredItemKeys = keyof StoredItem;
 
 /**
- * A utility class for managing the localstorage of objects of a particular type
+ * A utility class for managing the localstorage database of objects of a particular type
  */
 export default class LocalStorage<T extends StoredItem> {
     
@@ -58,6 +60,14 @@ export default class LocalStorage<T extends StoredItem> {
         } as T;
     }
 
+    share(data: T){
+        return generateShareParams(data);
+    }
+
+    import(params: URLSearchParams): T {
+        return importData<T>(params)
+    }
+
     /**
      * Saves a JSON object to localstorage and updates the last modified time to the current time
      * @param data the object to store
@@ -78,6 +88,10 @@ export default class LocalStorage<T extends StoredItem> {
         );
     }
 
+    /**
+     * Deletes a key from the localstorage database
+     * @param id the id of the object to delete
+     */
     delete(id: string){
         localStorage.removeItem(
             this.getResourceLocation(id)
