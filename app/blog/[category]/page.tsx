@@ -40,9 +40,13 @@ export default async function PostPage({ params }: Props) {
   return (
     <div>
       <h1>{formattedCategory} Blog</h1>
+        <div className="col-span-2">
         { posts.map( post =>
+          <div className="col-span-2 md:col-span-1">
             <PostListing key={post.id} post={post} />
+          </div>
         ) }
+        </div>
         { posts.length == 0 && <p>There are no posts in this category, check back later!</p> }
     </div>
    

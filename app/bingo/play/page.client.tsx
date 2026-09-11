@@ -1,7 +1,7 @@
 'use client';
 
 import InteractiveBingoCard from "@/components/bingo/InteractiveBingoCard";
-import type { BingoGameManage } from "@/logic/bingo/bingo-game-manage";
+import { BingoGameManage } from "@/logic/bingo/bingo-game-manage";
 import { BingoRoutes } from "@/logic/bingo/bingo-routes";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,28 +14,22 @@ export default function PlayBingoClientPage(){
     const [game, setGame] = useState<BingoGameManage>()
 
     useEffect( () => {
-        const loadClass = async () => {
-            const { BingoGameManage } = await import("@/logic/bingo/bingo-game-manage")
+        const currentId = searchParams.get("game")
 
-            const currentId = searchParams.get("game")
-
-            if (!currentId){
-                window.location.href = BingoRoutes.home();
-                return;
-            }
-
-            const game = BingoGameManage.loadBingoGame(currentId);
-
-            if (!game){
-                //Todo: Error message
-                return;
-            }
-
-            setGame(game);
-            setLoading(false)
+        if (!currentId){
+            window.location.href = BingoRoutes.home();
+            return;
         }
 
-        loadClass();
+        const game = BingoGameManage.loadBingoGame(currentId);
+
+        if (!game){
+            //Todo: Error message
+            return;
+        }
+
+        setGame(game);
+        setLoading(false)
     }, [])
 
     return (

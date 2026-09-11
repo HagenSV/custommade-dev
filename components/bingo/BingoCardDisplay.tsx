@@ -3,6 +3,7 @@ import { BingoCardManage } from "@/logic/bingo/bingo-card-manage"
 import { useMemo } from "react"
 
 interface BingoCardDisplayProps {
+    className?: string,
     card: BingoCardData,
     seed: number,
     cellStates: BingoCardCell[]
@@ -14,7 +15,7 @@ export interface BingoCardCell {
 }
 
 
-export default function BingoCardDisplay({ card, seed, cellStates }: BingoCardDisplayProps) {
+export default function BingoCardDisplay({ className, card, seed, cellStates }: BingoCardDisplayProps) {
 
     if (cellStates.length !== card.rows*card.cols){
         throw new Error("cellStates mismatch with card size");
@@ -33,7 +34,7 @@ export default function BingoCardDisplay({ card, seed, cellStates }: BingoCardDi
     } 
 
     return (
-        <table className="hyphens-auto break-all text-xs lg:break-normal lg:text-sm border-collapse border-3 border-color-black w-full table-fixed max-w-150 m-auto">
+        <table className={`hyphens-auto break-all text-xs lg:break-normal lg:text-sm border-collapse border-3 border-color-black w-full table-fixed max-w-150 m-auto ${className}`}>
             <tbody>
             { rows.map( r => (
                 <tr key={r}>
@@ -45,7 +46,7 @@ export default function BingoCardDisplay({ card, seed, cellStates }: BingoCardDi
                     return (
                         <td key={c} className="border-1">
                             <div 
-                                className={`p-1 flex justify-center items-center w-full aspect-square md:aspect-3/2 ${ state.highlighted ? 'bg-yellow-300/30' : '' }`}
+                                className={`p-1 flex justify-center items-center w-full ${ state.highlighted ? 'bg-yellow-300/30' : '' }`}
                                 onClick={ () => state.onClick?.() }
                             >
                             <p className="text-center">{ value }</p>

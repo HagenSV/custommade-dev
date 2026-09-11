@@ -23,7 +23,7 @@ export default function SidebarAd(){
     if (!mounted) return null;
 
     return (
-        <div className="w-full h-100 bg-white sticky top-30">
+        <div className="w-full h-100 sticky top-30">
         <ins className="adsbygoogle block w-full"
               data-ad-client="ca-pub-2755508775935324"
               data-ad-slot="8354558730"

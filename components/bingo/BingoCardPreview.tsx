@@ -43,6 +43,7 @@ export default function BingoCardPreview({ card, initialSeed, actions }: Props) 
             </div>
 
         <BingoCardDisplay 
+            className="aspect-square md:aspect-3/2"
             card={card.getData()}
             seed={seed}
             cellStates={cellStates}

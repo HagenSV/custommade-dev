@@ -1,28 +1,61 @@
 @import "tailwindcss";
 
+/**
+Source - https://stackoverflow.com/a/7961750
+Posted by Nicolas Modrzyk, modified by community. See post 'Timeline' for change history
+Retrieved 2026-09-02, License - CC BY-SA 3.0
+*/
+@font-face { 
+  font-family: OpenDyslexic; 
+  src: url('/font/OpenDyslexic-Regular.otf'); 
+} 
+
+@font-face { 
+  font-family: OpenDyslexic; 
+  font-weight: bold; 
+  src: url('/font/OpenDyslexic-Bold.otf');
+}
+
+@font-face { 
+  font-family: OpenDyslexic; 
+  font-weight: bold; 
+  font-style: italic;
+  src: url('/font/OpenDyslexic-BoldItalic.otf');
+}
+
+@font-face { 
+  font-family: OpenDyslexic; 
+  font-style: italic;
+  src: url('/font/OpenDyslexic-Italic.otf');
+}
+
+
 body {
-  font-family: "Schoolbell", Arial, Helvetica, sans-serif;
+  font-family: OpenDyslexic, Arial, Helvetica, sans-serif;
+  letter-spacing: -0.2rem;
+  font-size: 1.05vw;
 }
 
 h1 {
-  font-weight: bolder;
-  font-size: 2.5em;
+  font-weight: bold;
+  font-size: 3em;
   margin: 1rem 0;
 }
 
 h2 {
+  font-size: 2.5em;
   font-weight: bold;
-  font-size: 2em;
-  margin: 1rem 0;
+  margin: 0.75rem 0;
+
 }
 
 h3 {
-  font-size: 1.5em;
-  margin: 1rem 0;
+  font-size: 1.75em;
+  margin: 0.5rem 0;
 }
 
 p {
-  margin: 0.5rem 0;
+  margin: 1rem 0;
 }
 
 ol {

@@ -20,13 +20,13 @@ export function removeLast<T>(list: T[], item: T) {
 }
 
 /**
- * Removes all instances of a value from the list. 
- * @param list the list
- * @param item the item to clear
- * @returns the new list without the item
+ * Removes all values from the list that match a given predicate
+ * @param list the list of values
+ * @param predicate the predicate function
+ * @returns new list without items matching the provided predicate
  */
-export function removeAll<T>(list: T[], item: T): T[] {
-    return list.filter(i => i !== item)
+export function removeAll<T>(list: T[], predicate: (item: T) => boolean): T[] {
+    return list.filter(i => !predicate(i));
 }
 
 /**

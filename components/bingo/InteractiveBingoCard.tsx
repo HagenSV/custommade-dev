@@ -56,6 +56,7 @@ export default function InteractiveBingoCard({ game }: Props){
         <div>
         { cellStates.length !== 0 && 
             <BingoCardDisplay 
+                className="aspect-square md:aspect-3/2"
                 card={card}
                 seed={seed}
                 cellStates={cellStates}

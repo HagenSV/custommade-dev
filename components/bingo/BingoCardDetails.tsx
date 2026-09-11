@@ -1,9 +1,13 @@
+'use client';
+
+import { useModalService } from "@/context/modal-service";
 import { BingoCardActions } from "@/logic/bingo/bingo-actions";
 import { BingoCardManage } from "@/logic/bingo/bingo-card-manage";
 import { BingoGameManage } from "@/logic/bingo/bingo-game-manage";
 import { BingoRoutes } from "@/logic/bingo/bingo-routes";
 import { Edit2, Play, Printer, Share2, Trash } from "lucide-react";
 import Link from "next/link";
+import BingoPrintOptions from "./BingoPrintOptions";
 
 interface Props {
     card: BingoCardManage;
@@ -16,6 +20,8 @@ const createBingoGame = (card: BingoCardManage, seed: number) => {
 }
 
 export default function BingoCardDetails({ card, deleteFunc }: Props) {
+    const dialogService = useModalService();
+
     return (
         <div className="bg-white rounded-xl shadow-md p-6 dark:bg-mist-800">
             <p className="text-xl font-bold">{ card.getData().name }</p>
@@ -24,12 +30,14 @@ export default function BingoCardDetails({ card, deleteFunc }: Props) {
                     
                 <Link href={BingoRoutes.edit(card)} className="p-3 hover:text-blue-500"><Edit2 /></Link>
                 
-                <div className="p-3 hover:text-lime-600">
+                {/* <div className="p-3 hover:text-lime-600">
                     <button onClick={() => createBingoGame(card,Math.round(Math.random()*1000))}><Play /></button>
-                </div>
-                {/* <div className="p-3 hover:text-slate-500">
-                    <Printer />
                 </div> */}
+                <div className="p-3 hover:text-slate-500">
+                    <button onClick={() => dialogService.openModal(id => <BingoPrintOptions modalId={id} card={card}/>)}>
+                        <Printer />
+                    </button>
+                </div>
                 <div className="p-3 hover:text-teal-600">
                     <button
                         onClick={() => BingoCardActions.share?.(card) }
@@ -37,8 +45,11 @@ export default function BingoCardDetails({ card, deleteFunc }: Props) {
                         <Share2 />
                     </button>
                 </div>
-                
-                <button onClick={() => deleteFunc(card)} className="p-3 hover:text-red-600"><Trash /></button>
+                <div className="p-3 hover:text-red-600">
+                    <button onClick={() => deleteFunc(card)}>
+                        <Trash />
+                    </button>
+                </div>
             </div>
         </div>
     )
