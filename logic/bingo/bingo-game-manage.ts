@@ -8,7 +8,11 @@ const bingoGameStorage = new LocalStorage<BingoGameData>(
     "/bingo/games",
     {
         highlightedSpaces: 0,
-        card: DEFAULT_CARD_VALUES,
+        card: {
+            id: "",
+            lastModified: 0,
+            ...DEFAULT_CARD_VALUES
+        },
         name: DEFAULT_CARD_VALUES.name + " Game",
         seed: 0
     }
