@@ -15,13 +15,7 @@ export default function ShareBingoCardClientPage(){
 
     useEffect( () => {
 
-        const shareData = searchParams.get("data")
-
-        if (!shareData){
-            return;
-        }
-
-        const card = BingoCardManage.importBingoCard(shareData);
+        const card = BingoCardManage.import(searchParams);
 
         if (!card){
             //Todo: Error message
@@ -41,7 +35,8 @@ export default function ShareBingoCardClientPage(){
                     card={card!} 
                     actions={{
                         edit: BingoCardActions.edit,
-                        play: BingoCardActions.play
+                        play: BingoCardActions.play,
+                        print: BingoCardActions.print
                     }} 
                 /> 
             }
