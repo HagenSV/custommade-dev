@@ -1,10 +1,9 @@
-name: Build
+name: Build Check
 
 on:
   pull_request:
-  push:
     branches:
-      - main
+      - master
 
 jobs:
   build:
