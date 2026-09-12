@@ -1,7 +1,7 @@
 'use client';
 
 import { BingoCardData } from "@/data/bingo";
-import { BingoCardManage } from "@/logic/bingo/bingo-card-manage";
+import { BINGO_CARD_CONFIG, BingoCardManage } from "@/logic/bingo/bingo-card-manage";
 import { useState } from "react";
 import BingoCardPreview from "./BingoCardPreview";
 import StyledInput from "../core/StyledInput";
@@ -55,6 +55,7 @@ export default function BingoCardEditForm({
                 <StyledInput
                     id="cardname"
                     value={data.name}
+                    maxLength={BINGO_CARD_CONFIG.MAX_NAME_LENGTH}
                     onChange={(e) => update("name", e.target.value)}
                 />
             </div>
@@ -67,7 +68,8 @@ export default function BingoCardEditForm({
                     <StyledInput
                         id="rows"
                         type="number"
-                        min={1}
+                        min={BINGO_CARD_CONFIG.MIN_SIZE}
+                        max={BINGO_CARD_CONFIG.MAX_SIZE}
                         value={data.rows}
                         onChange={(e) =>
                             update("rows", Number(e.target.value))
@@ -82,7 +84,8 @@ export default function BingoCardEditForm({
                     <StyledInput
                         id="cols"
                         type="number"
-                        min={1}
+                        min={3}
+                        max={7}
                         value={data.cols}
                         onChange={(e) =>
                             update("cols", Number(e.target.value))
@@ -123,6 +126,7 @@ export default function BingoCardEditForm({
                     id="freeSpaceText"
                     disabled={!data.hasFreeSpace}
                     value={data.freeSpaceText}
+                    maxLength={BINGO_CARD_CONFIG.MAX_CELL_TEXT_LENGTH}
                     onChange={(e) =>
                         update("freeSpaceText", e.target.value)
                     }
@@ -152,6 +156,7 @@ export default function BingoCardEditForm({
                                 name={`value${index+1}`}
                                 className="flex-1 rounded border px-3 py-2"
                                 value={entry}
+                                maxLength={BINGO_CARD_CONFIG.MAX_CELL_TEXT_LENGTH}
                                 onChange={(e) =>
                                     updateValues(index, e.target.value)
                                 }

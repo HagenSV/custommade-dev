@@ -8,7 +8,15 @@ import LocalStorage from "../shared/localstorage-api";
 //Card limits
 //Rows & Cols 3-7
 //Bingo cells 30-50 chars
-//100 values max
+//100 values maxW
+
+export const BINGO_CARD_CONFIG = {
+    MAX_NAME_LENGTH: 150,
+    MAX_CELL_TEXT_LENGTH: 50,
+    MIN_SIZE: 3,
+    MAX_SIZE: 7,
+
+}
 
 export const DEFAULT_CARD_VALUES = {
     name: "Custom Bingo Card",
